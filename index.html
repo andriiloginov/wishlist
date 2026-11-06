@@ -34,7 +34,7 @@
   <header class="border-b border-line px-4 pb-12 pt-14 text-center sm:px-8 sm:pb-16 sm:pt-20">
     <img src="avatar.jpg" alt="Аватар" width="96" height="96" class="mx-auto h-24 w-24 rounded-full border border-line object-cover">
     <h1 class="mt-5 font-display text-2xl font-medium leading-tight sm:text-3xl">Вішліст</h1>
-    <p class="mx-auto mt-5 max-w-xl text-base text-muted sm:text-lg">Оберіть гру й натисніть «Купити», щоб перейти в магазин.</p>
+    <p class="mx-auto mt-5 max-w-xl text-base text-muted sm:text-lg">Оберіть гру й натисніть «В магазин», щоб відкрити її сторінку.</p>
     <p class="mx-auto mt-3 max-w-xl text-sm text-muted">Магазин RetroMagaz на сусідній вулиці від мене, тож можна забрати й особисто.</p>
     <a href="https://www.google.com/maps/place/RetroMagaz/@50.4453954,30.5051435,17z/data=!4m6!3m5!1s0x40d4c4513baf8719:0xb98b713fca6e77a9!8m2!3d50.445386!4d30.5077231" target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-1 rounded-full border border-line bg-panel px-3 py-1.5 font-mono text-xs uppercase tracking-wide transition hover:border-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Магазин на карті ↗</a>
   </header>
@@ -72,7 +72,7 @@
     const foot = el("div", "mt-auto flex flex-wrap items-center justify-between gap-2 pt-4");
     foot.append(
       el("span", "font-mono text-sm tabular-nums", g.price),
-      link(el("a", "inline-flex items-center gap-1 rounded-full border border-accent-line bg-accent px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-black transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink", "Купити ↗"), g.link),
+      link(el("a", "inline-flex items-center gap-1 rounded-full border border-accent-line bg-accent px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-black transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink", "В магазин ↗"), g.link),
     );
     li.append(cover, tag, name, foot);
     document.getElementById("list").append(li);
