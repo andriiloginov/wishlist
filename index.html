@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Вішліст на день народження</title>
 <script>
-  // ⬇️ Вставте адресу вебдодатку з Apps Script (закінчується на /exec)
-  const API_URL = "https://script.google.com/macros/s/AKfycbxV7l0u_ep_E9PLU10wg8b6ryTgpDQ_vxE_aUxCiXgP0dRpz3HvplVaZVi58xCDGCq60Q/exec";
-  const TITLE = "Вішліст на день народження";
-  // Подарунки. id не міняти після публікації: до нього прив'язані резерви.
+  // Подарунки: title, note, price, link, img
   const R = "https://retromagaz.com/product/", I = "https://retromagaz.com/uploads/products/";
   const ITEMS = [
     { id: "zelda-la-dx", img: I + "a7/02/site_g7hfdd7m5_7f5c7235.png", title: "The Legend of Zelda: Link's Awakening DX", note: "Game Boy, тільки картридж", price: "3 749 ₴", link: R + "gra-nintendo-game-boy-the-legend-of-zelda-links-awakening-dx-je-zberezennia-angliiska-versiia-tilki-kartridz-bu" },
@@ -47,170 +44,33 @@
 <main class="mx-auto max-w-2xl px-4 py-12 sm:py-16">
   <header class="mb-10">
     <h1 id="title" class="text-3xl font-semibold tracking-tight">Вішліст на день народження</h1>
-    <p class="mt-2 text-sm text-muted">Оберіть подарунок, натисніть «Зарезервувати» і впишіть своє ім'я, щоб інші його не дублювали.</p>
+    <p class="mt-2 text-sm text-muted">Оберіть подарунок і натисніть «Купити», щоб перейти в магазин.</p>
   </header>
 
   <ul id="list" class="cards"></ul>
-  <p id="empty" class="rounded-lg border border-dashed border-line p-8 text-center text-sm text-muted" hidden></p>
-  <p id="status" class="mt-6 text-sm text-muted" role="status"></p>
 </main>
 
 <script>
 (() => {
-  const $ = (id) => document.getElementById(id);
-  document.title = TITLE; $("title").textContent = TITLE;
-  const status = (t) => { $("status").textContent = t || ""; };
+  const SOLID = "inline-flex items-center rounded-md bg-inv px-3 py-1.5 text-sm font-medium text-inv-fg hover:bg-hover cursor-pointer w-full";
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const link = (e, href) => { e.href = href; e.target = "_blank"; e.rel = "noopener"; return e; };
 
-  const store = {
-    get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
-  };
-  let tokens = store.get("wishlist-tokens", {});   // giftId -> token (мої резерви)
-  let gifts = ITEMS.map((g) => ({ ...g, reserved_by: null }));  // картки видно одразу, резерви довантажуються
-  let openForm = null;                                // id подарунка з відкритою формою
-
-  if (!API_URL) {
-    $("empty").hidden = false;
-    $("empty").textContent = "Сторінку ще не налаштовано: впишіть API_URL на початку index.html.";
-    return;
+  for (const g of ITEMS) {
+    const li = el("li", "card");
+    const info = el("div", "min-w-0");
+    const cover = link(el("a", "cover"), g.link);
+    cover.tabIndex = -1;
+    const img = el("img"); img.src = g.img; img.alt = ""; img.loading = "lazy";
+    cover.append(img);
+    const name = el("p", "mt-3 font-medium break-words");
+    name.append(link(el("a", "underline decoration-line underline-offset-4 hover:decoration-fg", g.title), g.link));
+    info.append(cover, name, el("p", "mt-1 text-sm text-muted break-words", [g.price, g.note].filter(Boolean).join(" · ")));
+    const actions = el("div", "actions");
+    actions.append(link(el("a", SOLID, "Купити"), g.link));
+    li.append(info, actions);
+    document.getElementById("list").append(li);
   }
-  async function api(body) {
-    const r = await fetch(API_URL, body
-      ? { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }
-      : { cache: "no-store" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const data = await r.json();
-    if (data.error) throw new Error(data.error);
-    return data;
-  }
-
-  function el(tag, cls, text) {
-    const e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
-    return e;
-  }
-  function safeUrl(u) {
-    try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; }
-  }
-  function btn(cls, text, onClick, type = "button") {
-    const b = el("button", cls, text);
-    b.type = type;
-    if (onClick) b.addEventListener("click", onClick);
-    return b;
-  }
-  const SOLID = "inline-flex items-center rounded-md bg-inv px-3 py-1.5 text-sm font-medium text-inv-fg hover:bg-hover cursor-pointer disabled:opacity-40";
-  const LINE = "inline-flex items-center rounded-md border border-line px-3 py-1.5 text-sm font-medium hover:border-fg cursor-pointer disabled:opacity-40";
-
-  async function load() {
-    let data;
-    try { data = await api(); if (!data || typeof data.reserved !== "object") throw 0; }
-    catch { status("Не вдалося перевірити, що вже зарезервовано. Спробуйте оновити сторінку пізніше."); return; }
-    status("");
-    gifts = ITEMS.map((g) => ({ ...g, reserved_by: data.reserved[g.id] || null }));
-    // забути токени подарунків, які вже не мої
-    for (const id of Object.keys(tokens)) {
-      if (!gifts.find((g) => String(g.id) === id && g.reserved_by)) delete tokens[id];
-    }
-    store.set("wishlist-tokens", tokens);
-    render();
-  }
-
-  function render() {
-    const list = $("list");
-    list.replaceChildren();
-    $("empty").hidden = gifts.length > 0;
-    $("empty").textContent = "Список поки порожній.";
-    list.hidden = gifts.length === 0;
-
-    for (const g of gifts) {
-      const mine = !!tokens[g.id];
-      const taken = !!g.reserved_by && !mine;
-      const li = el("li", "card");
-      const href = g.link && safeUrl(g.link);
-
-      const info = el("div", "min-w-0" + (taken ? " opacity-40" : ""));
-      const cover = el(href ? "a" : "div", "cover");
-      if (href) { cover.href = href; cover.target = "_blank"; cover.rel = "noopener"; cover.tabIndex = -1; }
-      const src = g.img && safeUrl(g.img);
-      if (src) { const img = el("img"); img.src = src; img.alt = ""; img.loading = "lazy"; cover.append(img); }
-      info.append(cover);
-      const name = el("p", "mt-3 font-medium break-words" + (taken ? " line-through" : ""));
-      if (href) {
-        const a = el("a", "underline decoration-line underline-offset-4 hover:decoration-fg", g.title);
-        a.href = href; a.target = "_blank"; a.rel = "noopener";
-        name.append(a);
-      } else name.textContent = g.title;
-      info.append(name);
-      const meta = [g.price, g.note].filter(Boolean).join(" · ");
-      if (meta) info.append(el("p", "mt-1 text-sm text-muted break-words", meta));
-      li.append(info);
-
-      const side = el("div", "actions");
-      const pair = (second) => {
-        const p = el("div", "flex flex-wrap gap-2");
-        if (href) {
-          const buy = el("a", SOLID + " flex-1 w-full", "Купити");
-          buy.href = href; buy.target = "_blank"; buy.rel = "noopener";
-          p.append(buy);
-        }
-        second.className += " flex-1 w-full";
-        p.append(second);
-        return p;
-      };
-      if (mine) {
-        side.append(pair(btn(LINE + " border-fg", "Скасувати", () => cancel(g.id))));
-        side.append(el("p", "mt-1 text-xs text-muted text-center", "Дарує " + g.reserved_by + " (ви)"));
-      } else if (taken) {
-        side.append(el("span", "inline-flex w-full rounded-md bg-soft px-3 py-1.5 text-sm text-muted", "Дарує " + g.reserved_by));
-      } else if (openForm !== g.id) {
-        side.append(pair(btn(LINE, "Зарезервувати", () => { openForm = g.id; render(); $("name-" + g.id).focus(); })));
-      } else {
-        const f = el("form");
-        const input = el("input", "w-full rounded-md border border-line bg-bg px-3 py-1.5 text-sm placeholder:text-faint focus:border-fg focus:outline-none");
-        input.id = "name-" + g.id; input.required = true; input.maxLength = 60;
-        input.placeholder = "Ваше ім'я"; input.autocomplete = "name";
-        input.value = store.get("wishlist-name", "");
-        const bs = el("div", "mt-2 flex gap-2");
-        bs.append(btn(SOLID + " flex-1 w-full", "OK", null, "submit"), btn(LINE + " flex-1 w-full", "Відміна", () => { openForm = null; render(); }));
-        f.append(input, bs);
-        f.addEventListener("submit", (e) => { e.preventDefault(); reserve(g.id, input.value, f); });
-        side.append(f);
-      }
-      li.append(side);
-      list.append(li);
-    }
-  }
-
-  async function reserve(id, name, form) {
-    name = name.trim();
-    if (!name) return;
-    form.querySelectorAll("button,input").forEach((x) => (x.disabled = true));
-    store.set("wishlist-name", name);
-    status("Резервуємо…");
-    let data;
-    try { data = await api({ action: "reserve", id, name }); }
-    catch { status("Не вдалося зарезервувати. Спробуйте ще раз."); form.querySelectorAll("button,input").forEach((x) => (x.disabled = false)); return; }
-    openForm = null;
-    if (!data.ok) status("Цей подарунок щойно зарезервував хтось інший.");
-    else { tokens[id] = data.token; store.set("wishlist-tokens", tokens); status(""); }
-    await load();
-  }
-
-  async function cancel(id) {
-    status("Скасовуємо…");
-    let data;
-    try { data = await api({ action: "cancel", id, token: tokens[id] }); }
-    catch { status("Не вдалося скасувати резерв. Спробуйте ще раз."); return; }
-    delete tokens[id]; store.set("wishlist-tokens", tokens);
-    status(data.ok ? "" : "Цей резерв уже скасовано.");
-    await load();
-  }
-
-  render();
-  load();
-  setInterval(() => { if (openForm === null && !document.hidden) load(); }, 30000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && openForm === null) load(); });
 })();
 </script>
 </body>
