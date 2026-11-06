@@ -3,106 +3,190 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
 <title>Вішліст на день народження</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500&family=Figtree:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
 <script>
   tailwind.config = { theme: { extend: {
-    colors: { bg: "var(--bg)", panel: "var(--panel)", ink: "var(--ink)", muted: "var(--muted)", line: "var(--line)", soft: "var(--soft)", accent: "var(--accent)", "accent-line": "var(--accent-line)" },
-    fontFamily: {
-      display: ['"Archivo"', "Helvetica", "Arial", "sans-serif"],
-      body: ['"Figtree"', "Helvetica", "Arial", "sans-serif"],
-      mono: ['"JetBrains Mono"', "ui-monospace", "Menlo", "monospace"],
-    },
+    colors: { sun: "#FFF200", navy: "#000099", sky: "#99CCFF", cream: "#FFFFCC", link: "#0000EE", visited: "#551A8B", tomato: "#E3170A", grass: "#009933", bevel: "#C0C0C0" },
+    fontFamily: { web: ["Verdana", "Tahoma", "Geneva", "sans-serif"], ui: ["Arial", "Helvetica", "sans-serif"], fat: ['"Arial Black"', "Arial", "sans-serif"] },
   } } };
 </script>
 <style>
-  /* Layout: framed center column with hairline rules, cover tiles on a 1px grid, graph-paper strips between sections */
-  :root { --bg:#e2e4dd; --panel:#fff; --ink:#0b0c0d; --muted:#5b636c; --line:#9aa2aa; --soft:#d0d2c8; --accent:#ffb200; --accent-line:#bd8209; color-scheme: light; }
-  body { background: var(--bg); color: var(--ink); margin: 0; }
+  /* Layout: 800px "table" page from 1999 — yellow masthead with folder tabs, navy link bar, sky-blue left rail, white center, cream right rail; stacks on phones */
+  :root { --page: #FFFFFF; --ink: #000000; color-scheme: light; }
+  body { background: var(--page); color: var(--ink); margin: 0; }
   [hidden] { display: none !important; }
-  .font-display { font-stretch: 125%; }
-  .grid-bg { background-image: linear-gradient(var(--soft) 1px, transparent 1px), linear-gradient(90deg, var(--soft) 1px, transparent 1px); background-size: 22px 22px; background-position: -1px -1px; }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  .web a { color: #0000EE; text-decoration: underline; }
+  .web a:visited { color: #551A8B; }
+  .web a:hover { color: #E3170A; }
+  .btn98 { background: #C0C0C0; color: #000; border: 2px outset #EFEFEF; font: bold 12px Arial, sans-serif; padding: 3px 10px; text-decoration: none !important; display: inline-block; white-space: nowrap; }
+  .btn98:active { border-style: inset; }
+  .web a.btn98, .web a.btn98:visited { color: #000; }
+  .tab { border: 1px solid #000; border-bottom: 0; border-radius: 8px 8px 0 0; background: #fff; }
+  .tab[aria-pressed="true"] { background: #000099; color: #fff; }
+  .blink { animation: blink 1s steps(2, start) infinite; }
+  @keyframes blink { to { visibility: hidden; } }
+  @media (prefers-reduced-motion: reduce) { .blink { animation: none; } }
 </style>
-</head>
-<body>
-<div class="mx-auto min-h-screen max-w-5xl border-x border-line bg-panel font-body antialiased" style="padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)">
-  <header class="border-b border-line px-4 pb-12 pt-14 text-center sm:px-8 sm:pb-16 sm:pt-20">
-    <img src="avatar.jpg" alt="Аватар" width="96" height="96" class="mx-auto h-24 w-24 rounded-full border border-line object-cover">
-    <h1 class="mt-5 font-display text-2xl font-medium leading-tight sm:text-3xl">Вішліст</h1>
-    <p class="mx-auto mt-5 max-w-xl text-base text-muted sm:text-lg">Оберіть гру й натисніть «В магазин», щоб відкрити її сторінку.</p>
-    <p class="mx-auto mt-3 max-w-xl text-sm text-muted">RetroMagaz на сусідній вулиці від мене, тож можна забрати й особисто.</p>
-    <a href="https://www.google.com/maps/place/RetroMagaz/@50.4453954,30.5051435,17z/data=!4m6!3m5!1s0x40d4c4513baf8719:0xb98b713fca6e77a9!8m2!3d50.445386!4d30.5077231" target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-1 rounded-full border border-line bg-panel px-3 py-1.5 font-mono text-xs uppercase tracking-wide transition hover:border-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Магазин на карті ↗</a>
-  </header>
-  <nav id="chips" aria-label="Платформи" class="flex flex-wrap justify-center gap-2 border-b border-line px-4 py-4"></nav>
-  <div class="grid-bg h-10 border-b border-line bg-bg"></div>
-  <ul id="list" class="grid grid-cols-2 overflow-hidden bg-panel sm:grid-cols-3"></ul>
-  <div class="grid-bg h-10 border-t border-line bg-bg"></div>
+<div class="web mx-auto max-w-[800px] bg-white font-web text-[13px] leading-snug" style="padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)">
+
+  <!-- masthead -->
+  <div class="border-b-4 border-navy bg-sun px-3 pt-3">
+    <div class="flex flex-wrap items-end justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <button id="avatar" type="button" aria-label="Конфеті!" class="relative shrink-0">
+          <img src="avatar.jpg" alt="Аватар" width="64" height="64" class="h-16 w-16 border-2 border-navy object-cover">
+          <span aria-hidden="true" class="absolute -bottom-2 -right-2 text-xl leading-none">🎂</span>
+        </button>
+        <div>
+          <p class="font-fat text-[40px] leading-none tracking-tight"><span class="text-tomato">Віш</span><span class="text-navy">ліст</span><sup class="font-ui text-xs text-navy">®</sup></p>
+        </div>
+      </div>
+    </div>
+    <nav id="tabs" aria-label="Платформи" class="mt-3 flex flex-wrap gap-1 font-ui text-[11px] font-bold uppercase"></nav>
+  </div>
+
+  <div class="flex flex-col sm:flex-row">
+
+    <!-- left rail -->
+    <aside class="order-2 bg-sky p-3 sm:order-1 sm:w-[210px] sm:shrink-0">
+      <h2 class="font-bold text-[15px]">ігри за платформою</h2>
+      <ul id="rail" class="mt-1 space-y-0.5 text-[11px]"></ul>
+      <h2 class="mt-5 font-bold text-[15px]">як це працює</h2>
+      <ol class="mt-1 list-decimal space-y-1 pl-4 text-[11px]">
+        <li>Тицяйте на гру або «В магазин»</li>
+        <li>Передзамовте її в RetroMagaz</li>
+        <li>Заберіть на сусідній вулиці</li>
+      </ol>
+      <h2 class="mt-5 font-bold text-[15px]">потрібна інфо?</h2>
+      <ul class="mt-1 space-y-0.5 text-[11px]">
+        <li><a href="https://maps.google.com/?cid=13369904437572564905" target="_blank" rel="noopener">Франка, 42 на карті</a></li>
+      </ul>
+    </aside>
+
+    <!-- center -->
+    <main class="order-1 min-w-0 flex-1 border-x border-sky px-3 py-3 sm:order-2">
+      <ul id="list" class="-mt-3 divide-y divide-dotted divide-navy"></ul>
+    </main>
+
+    <!-- right rail -->
+    <aside class="order-3 bg-cream p-3 text-center sm:w-[150px] sm:shrink-0">
+      <p class="font-ui text-[22px] font-bold leading-tight text-navy">Потрібен подарунок?</p>
+      <p class="mt-1 font-ui text-sm"><a href="#list">Обирайте зі списку</a> і рятуйте свято!</p>
+      <hr class="my-4 border-navy">
+      <p class="font-ui text-[11px]">сьогодні у списку</p>
+      <p id="total" class="font-fat text-[44px] leading-none text-tomato"></p>
+      <p class="font-ui text-[11px]">ігор</p>
+      <hr class="my-4 border-navy">
+      <p class="blink font-fat text-sm text-grass">НОВИНКА!</p>
+      <p class="mt-1 font-ui text-[11px]">Тисніть на аватарку — буде свято 🎉</p>
+    </aside>
+  </div>
+
+  <!-- footer -->
+  <footer class="border-t-4 border-sun px-3 py-6 text-center font-ui">
+    <p class="text-sm font-bold">Пропозиції вітаються!</p>
+    <p class="mt-1 text-xs">Знайшли гру, якої тут немає? Скажіть мені особисто.</p>
+    <p id="visits" class="mt-4 text-xs" hidden>Ви відвідувач № <span id="visit-no" class="bg-black px-1 font-mono text-grass"></span></p>
+    <p class="mt-4 text-[10px]">© 1999–2026 Вішліст. Усі права захищено.</p>
+  </footer>
 </div>
 <script>
   const R = "https://retromagaz.com/product/", I = "https://retromagaz.com/uploads/products/";
   const ITEMS = [
-    { id: "zelda-la-dx", img: I + "a7/02/site_g7hfdd7m5_7f5c7235.png", title: "The Legend of Zelda: Link's Awakening DX", note: "Game Boy, тільки картридж", price: "3 749 ₴", link: R + "gra-nintendo-game-boy-the-legend-of-zelda-links-awakening-dx-je-zberezennia-angliiska-versiia-tilki-kartridz-bu" },
-    { id: "lotr-rotk", img: I + "b2/14/site_f4nu58nsm_f6cfac86.png", title: "The Lord of the Rings: The Return of the King", note: "PlayStation 2", price: "849 ₴", link: R + "ps2-igra-lord-of-the-rings-return-of-the-king-e-orig-bu" },
-    { id: "sims-2", img: I + "42/99/site_er9a92ko9_2f77a667.png", title: "The Sims 2", note: "PlayStation 2", price: "199 ₴", link: R + "ps2-igra-sims-2-e-orig-bu" },
-    { id: "max-payne", img: I + "eb/67/site_erflqdci6_d65687bc.png", title: "Max Payne", note: "PlayStation 2", price: "1 099 ₴", link: R + "ps2-igra-max-payne-e-orig-bu" },
-    { id: "ecco-tides", img: I + "c6/8b/site_g4tpaukps_9c301fc2.png", title: "Ecco: The Tides of Time", note: "Sega Mega Drive", price: "1 849 ₴", link: R + "gra-sega-mega-drive-ecco-the-tides-of-time-usa-angliiska-versiia-bu" },
-    { id: "toejam-earl", img: I + "68/37/site_g06i6n6hl_cf600dc6.png", title: "ToeJam & Earl in Panic on Funkotron", note: "Sega Mega Drive", price: "1 699 ₴", link: R + "gra-sega-mega-drive-toejam-earl-in-panic-on-funkotron-europe-angliiska-versiia-bu" },
-    { id: "dkc-2", img: I + "bc/26/site_g52nngu9a_bd935e71.png", title: "Donkey Kong Country 2", note: "Game Boy Advance, тільки картридж", price: "1 499 ₴", link: R + "gra-nintendo-game-boy-advance-donkey-kong-country-2-angliiska-versiia-tilki-kartridz-bu" },
-    { id: "spyro-2", img: I + "dd/e9/site_g52okv09s_3430f273.png", title: "Spyro 2: Season of Flame", note: "Game Boy Advance, тільки картридж", price: "699 ₴", link: R + "gra-nintendo-game-boy-advance-spyro-2-season-of-flame-angliiska-versiia-tilki-kartridz-bu" },
-    { id: "shrek-2", img: I + "30/04/site_g6m335m1a_89d9cb47.png", title: "Shrek 2", note: "Game Boy Advance", price: "1 099 ₴", link: R + "gra-nintendo-game-boy-advance-shrek-2-angliiska-versiia-bu" },
-    { id: "millionaire", img: I + "fb/61/site_g6hcpkrpr_26dff36d.png", title: "Who Wants to Be a Millionaire", note: "PlayStation 1", price: "699 ₴", link: R + "gra-sony-playstation-1-who-wants-to-be-a-millionaire-europe-angliiska-versiia-bu" },
-    { id: "micro-machines-v3", img: I + "56/1a/site_g6lc5h19o_e22ca517.png", title: "Micro Machines V3", note: "PlayStation 1", price: "999 ₴", link: R + "gra-sony-playstation-1-micro-machines-v3-europe-angliiska-versiia-bu" },
-    { id: "resident-evil-2", img: I + "b4/30/site_g36895cm9_4f42facd.png", title: "Resident Evil 2", note: "PlayStation 1, 2 диски", price: "2 999 ₴", link: R + "gra-sony-playstation-1-resident-evil-2-biohazard-2-europe-angliiska-versiia-bu" },
-    { id: "dk-land", img: I + "20/da/site_g7cngr157_35318104.png", title: "Donkey Kong Land", note: "Game Boy, тільки картридж", price: "899 ₴", link: R + "gra-nintendo-game-boy-donkey-kong-land-angliiska-versiia-tilki-kartridz-bu" },
-    { id: "tmnt-gba", img: I + "6d/d2/site_ga190tl06_37ce9dd7.png", title: "Teenage Mutant Ninja Turtles", note: "Game Boy Advance, тільки картридж", price: "1 199 ₴", link: R + "gra-nintendo-game-boy-advance-teenage-mutant-ninja-turtles-angliiska-versiia-tilki-kartridz-vzivanii" },
-    { id: "deus-ex", img: I + "22/67/site_fij8btl1h_618a0938.png", title: "Deus Ex", note: "PlayStation 2", price: "1 199 ₴", link: R + "gra-sony-playstation-2-deus-ex-europe-angliyska-versiya-bu" },
-    { id: "nba-street", img: I + "62/a9/site_g7ou7s855_bc8804d0.png", title: "NBA Street", note: "PlayStation 2", price: "479 ₴", link: R + "gra-sony-playstation-2-nba-street-europe-angliiska-versiia-bu" },
-    { id: "hitman-2", img: I + "45/1d/site_ere8uvq43_d8ecbf90.png", title: "Hitman 2: Silent Assassin", note: "PlayStation 2", price: "399 ₴", link: R + "ps2-igra-hitman-2-silent-assassin-e-orig-bu" },
+    { id: "zelda-la-dx", img: "covers/site_g7hfdd7m5_7f5c7235.png", title: "The Legend of Zelda: Link's Awakening DX", note: "Game Boy, тільки картридж", price: "3 749 ₴", link: R + "gra-nintendo-game-boy-the-legend-of-zelda-links-awakening-dx-je-zberezennia-angliiska-versiia-tilki-kartridz-bu" },
+    { id: "lotr-rotk", img: "covers/site_f4nu58nsm_f6cfac86.png", title: "The Lord of the Rings: The Return of the King", note: "PlayStation 2", price: "849 ₴", link: R + "ps2-igra-lord-of-the-rings-return-of-the-king-e-orig-bu" },
+    { id: "sims-2", img: "covers/site_er9a92ko9_2f77a667.png", title: "The Sims 2", note: "PlayStation 2", price: "199 ₴", link: R + "ps2-igra-sims-2-e-orig-bu" },
+    { id: "max-payne", img: "covers/site_erflqdci6_d65687bc.png", title: "Max Payne", note: "PlayStation 2", price: "1 099 ₴", link: R + "ps2-igra-max-payne-e-orig-bu" },
+    { id: "ecco-tides", img: "covers/site_g4tpaukps_9c301fc2.png", title: "Ecco: The Tides of Time", note: "Sega Mega Drive", price: "1 849 ₴", link: R + "gra-sega-mega-drive-ecco-the-tides-of-time-usa-angliiska-versiia-bu" },
+    { id: "toejam-earl", img: "covers/site_g06i6n6hl_cf600dc6.png", title: "ToeJam & Earl in Panic on Funkotron", note: "Sega Mega Drive", price: "1 699 ₴", link: R + "gra-sega-mega-drive-toejam-earl-in-panic-on-funkotron-europe-angliiska-versiia-bu" },
+    { id: "dkc-2", img: "covers/site_g52nngu9a_bd935e71.png", title: "Donkey Kong Country 2", note: "Game Boy Advance, тільки картридж", price: "1 499 ₴", link: R + "gra-nintendo-game-boy-advance-donkey-kong-country-2-angliiska-versiia-tilki-kartridz-bu" },
+    { id: "spyro-2", img: "covers/site_g52okv09s_3430f273.png", title: "Spyro 2: Season of Flame", note: "Game Boy Advance, тільки картридж", price: "699 ₴", link: R + "gra-nintendo-game-boy-advance-spyro-2-season-of-flame-angliiska-versiia-tilki-kartridz-bu" },
+    { id: "shrek-2", img: "covers/site_g6m335m1a_89d9cb47.png", title: "Shrek 2", note: "Game Boy Advance", price: "1 099 ₴", link: R + "gra-nintendo-game-boy-advance-shrek-2-angliiska-versiia-bu" },
+    { id: "millionaire", img: "covers/site_g6hcpkrpr_26dff36d.png", title: "Who Wants to Be a Millionaire", note: "PlayStation 1", price: "699 ₴", link: R + "gra-sony-playstation-1-who-wants-to-be-a-millionaire-europe-angliiska-versiia-bu" },
+    { id: "micro-machines-v3", img: "covers/site_g6lc5h19o_e22ca517.png", title: "Micro Machines V3", note: "PlayStation 1", price: "999 ₴", link: R + "gra-sony-playstation-1-micro-machines-v3-europe-angliiska-versiia-bu" },
+    { id: "resident-evil-2", img: "covers/site_g36895cm9_4f42facd.png", title: "Resident Evil 2", note: "PlayStation 1, 2 диски", price: "2 999 ₴", link: R + "gra-sony-playstation-1-resident-evil-2-biohazard-2-europe-angliiska-versiia-bu" },
+    { id: "dk-land", img: "covers/site_g7cngr157_35318104.png", title: "Donkey Kong Land", note: "Game Boy, тільки картридж", price: "899 ₴", link: R + "gra-nintendo-game-boy-donkey-kong-land-angliiska-versiia-tilki-kartridz-bu" },
+    { id: "tmnt-gba", img: "covers/site_ga190tl06_37ce9dd7.png", title: "Teenage Mutant Ninja Turtles", note: "Game Boy Advance, тільки картридж", price: "1 199 ₴", link: R + "gra-nintendo-game-boy-advance-teenage-mutant-ninja-turtles-angliiska-versiia-tilki-kartridz-vzivanii" },
+    { id: "deus-ex", img: "covers/site_fij8btl1h_618a0938.png", title: "Deus Ex", note: "PlayStation 2", price: "1 199 ₴", link: R + "gra-sony-playstation-2-deus-ex-europe-angliyska-versiya-bu" },
+    { id: "nba-street", img: "covers/site_g7ou7s855_bc8804d0.png", title: "NBA Street", note: "PlayStation 2", price: "479 ₴", link: R + "gra-sony-playstation-2-nba-street-europe-angliiska-versiia-bu" },
+    { id: "hitman-2", img: "covers/site_ere8uvq43_d8ecbf90.png", title: "Hitman 2: Silent Assassin", note: "PlayStation 2", price: "399 ₴", link: R + "ps2-igra-hitman-2-silent-assassin-e-orig-bu" },
   ];
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const link = (e, href) => { e.href = href; e.target = "_blank"; e.rel = "noopener"; return e; };
+  const list = document.getElementById("list");
   for (const g of ITEMS) {
-    const li = el("li", "group flex min-w-0 flex-col p-3 shadow-[1px_1px_0_0_var(--line)] sm:p-5");
-    const cover = link(el("a", "grid-bg block aspect-[410/520] max-w-full overflow-hidden border border-line bg-bg"), g.link);
+    const li = el("li", "flex gap-3 py-3");
+    const cover = link(el("a", "block w-[72px] shrink-0 sm:w-[84px]"), g.link);
     cover.tabIndex = -1;
-    const img = el("img", "h-full w-full object-contain p-3 transition-transform duration-200 group-hover:scale-[1.03]");
-    img.src = g.img; img.alt = g.title; img.loading = "lazy";
+    const img = el("img", "w-full"); img.src = g.img; img.alt = g.title; img.loading = "lazy";
     cover.append(img);
-    const tag = el("p", "mt-4 font-mono text-[11px] uppercase tracking-wider text-muted", g.note);
-    const name = el("p", "mt-1 font-medium leading-snug [overflow-wrap:anywhere]");
-    name.append(link(el("a", "hover:underline hover:underline-offset-4", g.title), g.link));
-    const foot = el("div", "mt-auto flex flex-wrap items-center justify-between gap-2 pt-4");
-    foot.append(
-      el("span", "font-mono text-sm tabular-nums", g.price),
-      link(el("a", "inline-flex items-center gap-1 rounded-full border border-accent-line bg-accent px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wide text-black transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink", "В магазин ↗"), g.link),
-    );
-    li.append(cover, tag, name, foot);
-    document.getElementById("list").append(li);
+    const info = el("div", "min-w-0 flex-1");
+    const name = el("p", "font-bold text-[14px] [overflow-wrap:anywhere]");
+    name.append(link(el("a", null, g.title), g.link));
+    const price = el("p", "mt-1 font-ui");
+    price.append("Ціна: ", el("b", "text-tomato", g.price));
+    const act = el("p", "mt-2");
+    act.append(link(el("a", "btn98", "В магазин »"), g.link));
+    info.append(name, el("p", "mt-0.5 text-[11px] text-neutral-600", g.note), price, act);
+    li.append(cover, info);
+    list.append(li);
   }
+  document.getElementById("total").textContent = ITEMS.length;
 
-  // Фільтр: платформа = текст нотатки до першої коми
+  // Фільтр: вкладки зверху + список у лівій колонці
   const platformOf = (g) => g.note.split(",")[0].trim();
-  const cards = [...document.getElementById("list").children];
-  const CHIP = "rounded-full border px-3 py-1 font-mono text-xs uppercase tracking-wide transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink";
-  const ON = " border-ink bg-ink text-panel", OFF = " border-line bg-panel text-ink hover:border-ink";
-  const chips = document.getElementById("chips");
+  const rows = [...list.children];
+  const platforms = [null, ...new Set(ITEMS.map(platformOf))];
+  const tabs = document.getElementById("tabs"), rail = document.getElementById("rail");
   const select = (p) => {
-    cards.forEach((li, i) => { li.hidden = p !== null && platformOf(ITEMS[i]) !== p; });
-    for (const b of chips.children) { const on = b.dataset.p === String(p); b.className = CHIP + (on ? ON : OFF); b.setAttribute("aria-pressed", on); }
+    rows.forEach((li, i) => { li.hidden = p !== null && platformOf(ITEMS[i]) !== p; });
+    for (const t of tabs.children) t.setAttribute("aria-pressed", t.dataset.p === String(p));
+    for (const a of rail.querySelectorAll("a")) a.style.fontWeight = a.dataset.p === String(p) ? "bold" : "";
   };
-  for (const p of [null, ...new Set(ITEMS.map(platformOf))]) {
+  for (const p of platforms) {
     const n = p === null ? ITEMS.length : ITEMS.filter((g) => platformOf(g) === p).length;
-    const b = el("button", null, (p ?? "Усі") + " · " + n);
-    b.type = "button"; b.dataset.p = String(p);
-    b.addEventListener("click", () => select(p));
-    chips.append(b);
+    const t = el("button", "tab px-3 py-1.5", p ?? "Усі");
+    t.type = "button"; t.dataset.p = String(p);
+    t.addEventListener("click", () => select(p));
+    tabs.append(t);
+    const li = el("li"); const a = el("a", null, (p ?? "Усі ігри") + " (" + n + ")");
+    a.href = "#list"; a.dataset.p = String(p);
+    a.addEventListener("click", (e) => { e.preventDefault(); select(p); });
+    li.append(a); rail.append(li);
   }
   select(null);
+
+  // Лічильник відвідувачів: кожен новий браузер +1, свій номер пам'ятає
+  (async () => {
+    const show = (n) => { document.getElementById("visit-no").textContent = String(n).padStart(6, "0"); document.getElementById("visits").hidden = false; };
+    let mine = null;
+    try { mine = localStorage.getItem("wishlist-visitor-no"); } catch {}
+    if (mine) return show(mine);
+    try {
+      const r = await fetch("https://abacus.jasoncameron.dev/hit/andriiloginov-wishlist/visits");
+      const { value } = await r.json();
+      if (!Number.isFinite(value)) return;
+      try { localStorage.setItem("wishlist-visitor-no", value); } catch {}
+      show(value);
+    } catch {}  // ponytail: лічильник недоступний — просто не показуємо рядок
+  })();
+
+  // Конфеті з аватарки
+  const avatar = document.getElementById("avatar");
+  const burst = () => {
+    if (!window.confetti) return;
+    const r = avatar.getBoundingClientRect();
+    const origin = { x: (r.left + r.width / 2) / innerWidth, y: (r.top + r.height / 2) / innerHeight };
+    const colors = ["#E3170A", "#FFF200", "#000099", "#009933", "#99CCFF"];
+    confetti({ particleCount: 90, spread: 75, startVelocity: 38, origin, colors, disableForReducedMotion: true });
+    confetti({ particleCount: 40, spread: 120, startVelocity: 25, scalar: 0.8, origin, colors, disableForReducedMotion: true });
+  };
+  avatar.addEventListener("click", burst);
+  setTimeout(burst, 400);
 </script>
 </body>
 </html>
