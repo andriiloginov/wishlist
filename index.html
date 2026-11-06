@@ -66,7 +66,7 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   };
   let tokens = store.get("wishlist-tokens", {});   // giftId -> token (мої резерви)
-  let gifts = [];
+  let gifts = ITEMS.map((g) => ({ ...g, reserved_by: null }));  // картки видно одразу, резерви довантажуються
   let openForm = null;                                // id подарунка з відкритою формою
 
   if (!API_URL) {
@@ -104,9 +104,9 @@
 
   async function load() {
     let data;
-    try { data = await api(); }
-    catch { status("Не вдалося завантажити список. Оновіть сторінку."); return; }
-    if (!gifts.length) status("");
+    try { data = await api(); if (!data || typeof data.reserved !== "object") throw 0; }
+    catch { status("Не вдалося перевірити, що вже зарезервовано. Спробуйте оновити сторінку пізніше."); return; }
+    status("");
     gifts = ITEMS.map((g) => ({ ...g, reserved_by: data.reserved[g.id] || null }));
     // забути токени подарунків, які вже не мої
     for (const id of Object.keys(tokens)) {
@@ -207,7 +207,7 @@
     await load();
   }
 
-  status("Завантаження…");
+  render();
   load();
   setInterval(() => { if (openForm === null && !document.hidden) load(); }, 30000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden && openForm === null) load(); });
