@@ -68,13 +68,6 @@
 
     <!-- right rail -->
     <aside class="order-3 bg-cream p-3 text-center sm:w-[150px] sm:shrink-0">
-      <p class="font-ui text-[22px] font-bold leading-tight text-navy">Потрібен подарунок?</p>
-      <p class="mt-2 font-ui text-sm"><a href="#list">Обирайте зі списку</a> або будь-який інший також підійде. Без подарунку також норм.</p>
-      <hr class="my-4 border-navy">
-      <p class="font-ui text-[11px]">сьогодні у списку</p>
-      <p id="total" class="font-fat text-[44px] leading-none text-tomato"></p>
-      <p class="font-ui text-[11px]">ігор</p>
-      <hr class="my-4 border-navy">
       <div class="burst blink mx-auto flex h-[78px] w-[118px] -rotate-12 items-center justify-center"><span class="font-fat text-[13px] text-sun">НОВИНКА!</span></div>
       <p class="mt-1 font-ui text-[11px]">Тисніть на аватарку — буде свято</p>
     </aside>
@@ -129,7 +122,6 @@
     li.append(cover, info);
     list.append(li);
   }
-  document.getElementById("total").textContent = ITEMS.length;
 
   // Фільтр: вкладки зверху + список у лівій колонці
   const platformOf = (g) => g.note.split(",")[0].trim();
