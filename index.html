@@ -3,11 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Вішліст на новосілля</title>
+<title>Вішліст на день народження</title>
 <script>
   // ⬇️ Вставте адресу вебдодатку з Apps Script (закінчується на /exec)
   const API_URL = "https://script.google.com/macros/s/AKfycbxV7l0u_ep_E9PLU10wg8b6ryTgpDQ_vxE_aUxCiXgP0dRpz3HvplVaZVi58xCDGCq60Q/exec";
-  const TITLE = "Вішліст на новосілля";
+  const TITLE = "Вішліст на день народження";
+  // Подарунки. id не міняти після публікації: до нього прив'язані резерви.
+  const R = "https://retromagaz.com/product/", I = "https://retromagaz.com/uploads/products/";
+  const ITEMS = [
+    { id: "zelda-la-dx", img: I + "a7/02/site_g7hfdd7m5_7f5c7235.png", title: "The Legend of Zelda: Link's Awakening DX", note: "Game Boy, тільки картридж", price: "3 749 ₴", link: R + "gra-nintendo-game-boy-the-legend-of-zelda-links-awakening-dx-je-zberezennia-angliiska-versiia-tilki-kartridz-bu" },
+    { id: "lotr-rotk", img: I + "b2/14/site_f4nu58nsm_f6cfac86.png", title: "The Lord of the Rings: The Return of the King", note: "PlayStation 2", price: "849 ₴", link: R + "ps2-igra-lord-of-the-rings-return-of-the-king-e-orig-bu" },
+    { id: "sims-2", img: I + "42/99/site_er9a92ko9_2f77a667.png", title: "The Sims 2", note: "PlayStation 2", price: "199 ₴", link: R + "ps2-igra-sims-2-e-orig-bu" },
+    { id: "max-payne", img: I + "eb/67/site_erflqdci6_d65687bc.png", title: "Max Payne", note: "PlayStation 2", price: "1 099 ₴", link: R + "ps2-igra-max-payne-e-orig-bu" },
+    { id: "ecco-tides", img: I + "c6/8b/site_g4tpaukps_9c301fc2.png", title: "Ecco: The Tides of Time", note: "Sega Mega Drive", price: "1 849 ₴", link: R + "gra-sega-mega-drive-ecco-the-tides-of-time-usa-angliiska-versiia-bu" },
+    { id: "toejam-earl", img: I + "68/37/site_g06i6n6hl_cf600dc6.png", title: "ToeJam & Earl in Panic on Funkotron", note: "Sega Mega Drive", price: "1 699 ₴", link: R + "gra-sega-mega-drive-toejam-earl-in-panic-on-funkotron-europe-angliiska-versiia-bu" },
+    { id: "dkc-2", img: I + "bc/26/site_g52nngu9a_bd935e71.png", title: "Donkey Kong Country 2", note: "Game Boy Advance, тільки картридж", price: "1 499 ₴", link: R + "gra-nintendo-game-boy-advance-donkey-kong-country-2-angliiska-versiia-tilki-kartridz-bu" },
+    { id: "spyro-2", img: I + "dd/e9/site_g52okv09s_3430f273.png", title: "Spyro 2: Season of Flame", note: "Game Boy Advance, тільки картридж", price: "699 ₴", link: R + "gra-nintendo-game-boy-advance-spyro-2-season-of-flame-angliiska-versiia-tilki-kartridz-bu" },
+    { id: "shrek-2", img: I + "30/04/site_g6m335m1a_89d9cb47.png", title: "Shrek 2", note: "Game Boy Advance", price: "1 099 ₴", link: R + "gra-nintendo-game-boy-advance-shrek-2-angliiska-versiia-bu" },
+    { id: "millionaire", img: I + "fb/61/site_g6hcpkrpr_26dff36d.png", title: "Who Wants to Be a Millionaire", note: "PlayStation 1", price: "699 ₴", link: R + "gra-sony-playstation-1-who-wants-to-be-a-millionaire-europe-angliiska-versiia-bu" },
+  ];
 </script>
 <style>
   :root { --bg:#fff; --fg:#0a0a0a; --muted:#737373; --faint:#a3a3a3; --line:#e5e5e5; --soft:#f5f5f5; --inv:#0a0a0a; --inv-fg:#fff; --hover:#262626; }
@@ -17,6 +31,14 @@
   body { background: var(--bg); color: var(--fg); }
   h1 { text-wrap: balance; }
   :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+  .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 1rem; }
+  @media (min-width: 40rem) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .card { display: flex; flex-direction: column; }
+  .card > .actions { margin-top: auto; padding-top: .75rem; }
+  .cover { display: block; aspect-ratio: 410 / 520; border-radius: .5rem; background: var(--soft); overflow: hidden; }
+  .cover img { width: 100%; height: 100%; object-fit: contain; padding: .75rem; transition: transform .2s; }
+  @media (hover: hover) { a.cover:hover img { transform: scale(1.03); } }
+  .card .w-full { width: 100%; justify-content: center; }
 </style>
 <style>/*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties{@supports (((-webkit-hyphens:none)) and (not (margin-trim:inline))) or ((-moz-orient:inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--tw-divide-y-reverse:0;--tw-border-style:solid;--tw-font-weight:initial;--tw-tracking:initial;--tw-outline-style:solid}}}@layer theme{:root,:host{--font-sans:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";--font-mono:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;--spacing:.25rem;--container-2xl:42rem;--text-xs:.75rem;--text-xs--line-height:calc(1 / .75);--text-sm:.875rem;--text-sm--line-height:calc(1.25 / .875);--text-3xl:1.875rem;--text-3xl--line-height:calc(2.25 / 1.875);--font-weight-medium:500;--font-weight-semibold:600;--tracking-tight:-.025em;--radius-md:.375rem;--radius-lg:.5rem;--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono);--color-bg:var(--bg);--color-fg:var(--fg);--color-muted:var(--muted);--color-faint:var(--faint);--color-line:var(--line);--color-soft:var(--soft);--color-inv:var(--inv);--color-inv-fg:var(--inv-fg);--color-hover:var(--hover)}}@layer base{*,:after,:before,::backdrop{box-sizing:border-box;border:0 solid;margin:0;padding:0}::file-selector-button{box-sizing:border-box;border:0 solid;margin:0;padding:0}html,:host{-webkit-text-size-adjust:100%;tab-size:4;line-height:1.5;font-family:var(--default-font-family,-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;-webkit-text-decoration:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var(--default-mono-font-family,ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-variation-settings:var(--default-mono-font-variation-settings,normal);font-size:1em}small{font-size:80%}sub,sup{vertical-align:baseline;font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring:where(:not(iframe)){outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{vertical-align:middle;display:block}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;opacity:1;background-color:#0000;border-radius:0}::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;opacity:1;background-color:#0000;border-radius:0}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not ((-webkit-appearance:-apple-pay-button))) or (contain-intrinsic-size:1px){::placeholder{color:currentColor}@supports (color:color-mix(in lab, red, red)){::placeholder{color:color-mix(in oklab, currentcolor 50%, transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit{padding-block:0}::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-datetime-edit-month-field{padding-block:0}::-webkit-datetime-edit-day-field{padding-block:0}::-webkit-datetime-edit-hour-field{padding-block:0}::-webkit-datetime-edit-minute-field{padding-block:0}::-webkit-datetime-edit-second-field{padding-block:0}::-webkit-datetime-edit-millisecond-field{padding-block:0}::-webkit-datetime-edit-meridiem-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]){appearance:button}::file-selector-button{appearance:button}::-webkit-inner-spin-button{height:auto}::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer components;@layer utilities{.mx-auto{margin-inline:auto}.mt-1{margin-top:var(--spacing)}.mt-2{margin-top:calc(var(--spacing) * 2)}.mt-3{margin-top:calc(var(--spacing) * 3)}.mt-6{margin-top:calc(var(--spacing) * 6)}.mb-10{margin-bottom:calc(var(--spacing) * 10)}.flex{display:flex}.hidden{display:none}.inline-block{display:inline-block}.inline-flex{display:inline-flex}.max-w-2xl{max-width:var(--container-2xl)}.min-w-0{min-width:0}.flex-1{flex:1}.shrink-0{flex-shrink:0}.cursor-pointer{cursor:pointer}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.items-start{align-items:flex-start}.justify-between{justify-content:space-between}.gap-2{gap:calc(var(--spacing) * 2)}.gap-4{gap:calc(var(--spacing) * 4)}:where(.divide-y>:not(:last-child)){--tw-divide-y-reverse:0;border-bottom-style:var(--tw-border-style);border-top-style:var(--tw-border-style);border-top-width:calc(1px * var(--tw-divide-y-reverse));border-bottom-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)))}:where(.divide-line>:not(:last-child)){border-color:var(--color-line)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.border{border-style:var(--tw-border-style);border-width:1px}.border-y{border-block-style:var(--tw-border-style);border-block-width:1px}.border-dashed{--tw-border-style:dashed;border-style:dashed}.border-fg{border-color:var(--color-fg)}.border-line{border-color:var(--color-line)}.bg-bg{background-color:var(--color-bg)}.bg-inv{background-color:var(--color-inv)}.bg-soft{background-color:var(--color-soft)}.p-8{padding:calc(var(--spacing) * 8)}.px-3{padding-inline:calc(var(--spacing) * 3)}.px-4{padding-inline:calc(var(--spacing) * 4)}.py-1\.5{padding-block:calc(var(--spacing) * 1.5)}.py-5{padding-block:calc(var(--spacing) * 5)}.py-12{padding-block:calc(var(--spacing) * 12)}.text-center{text-align:center}.text-right{text-align:right}.text-3xl{font-size:var(--text-3xl);line-height:var(--tw-leading,var(--text-3xl--line-height))}.text-sm{font-size:var(--text-sm);line-height:var(--tw-leading,var(--text-sm--line-height))}.text-xs{font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height))}.font-medium{--tw-font-weight:var(--font-weight-medium);font-weight:var(--font-weight-medium)}.font-semibold{--tw-font-weight:var(--font-weight-semibold);font-weight:var(--font-weight-semibold)}.tracking-tight{--tw-tracking:var(--tracking-tight);letter-spacing:var(--tracking-tight)}.text-wrap{text-wrap:wrap}.break-words{overflow-wrap:break-word}.text-inv-fg{color:var(--color-inv-fg)}.text-muted{color:var(--color-muted)}.line-through{text-decoration-line:line-through}.underline{text-decoration-line:underline}.decoration-line{-webkit-text-decoration-color:var(--color-line);-webkit-text-decoration-color:var(--color-line);text-decoration-color:var(--color-line)}.underline-offset-4{text-underline-offset:4px}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-40{opacity:.4}.outline{outline-style:var(--tw-outline-style);outline-width:1px}.placeholder\:text-faint::placeholder{color:var(--color-faint)}@media (hover:hover){.hover\:border-fg:hover{border-color:var(--color-fg)}.hover\:bg-hover:hover{background-color:var(--color-hover)}.hover\:decoration-fg:hover{-webkit-text-decoration-color:var(--color-fg);-webkit-text-decoration-color:var(--color-fg);text-decoration-color:var(--color-fg)}}.focus\:border-fg:focus{border-color:var(--color-fg)}.focus\:outline-none:focus{--tw-outline-style:none;outline-style:none}.disabled\:opacity-40:disabled{opacity:.4}@media (min-width:40rem){.sm\:py-16{padding-block:calc(var(--spacing) * 16)}}}@property --tw-divide-y-reverse{syntax:"*";inherits:false;initial-value:0}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-font-weight{syntax:"*";inherits:false}@property --tw-tracking{syntax:"*";inherits:false}@property --tw-outline-style{syntax:"*";inherits:false;initial-value:solid}</style>
@@ -24,11 +46,11 @@
 <body class="antialiased">
 <main class="mx-auto max-w-2xl px-4 py-12 sm:py-16">
   <header class="mb-10">
-    <h1 id="title" class="text-3xl font-semibold tracking-tight">Вішліст на новосілля</h1>
-    <p class="mt-2 text-sm text-muted">Оберіть подарунок, натисніть «Зарезервувати» і впишіть своє ім'я, щоб інші гості його не дублювали.</p>
+    <h1 id="title" class="text-3xl font-semibold tracking-tight">Вішліст на день народження</h1>
+    <p class="mt-2 text-sm text-muted">Оберіть подарунок, натисніть «Зарезервувати» і впишіть своє ім'я, щоб інші його не дублювали.</p>
   </header>
 
-  <ul id="list" class="divide-y divide-line border-y border-line"></ul>
+  <ul id="list" class="cards"></ul>
   <p id="empty" class="rounded-lg border border-dashed border-line p-8 text-center text-sm text-muted" hidden></p>
   <p id="status" class="mt-6 text-sm text-muted" role="status"></p>
 </main>
@@ -85,7 +107,7 @@
     try { data = await api(); }
     catch { status("Не вдалося завантажити список. Оновіть сторінку."); return; }
     if (!gifts.length) status("");
-    gifts = data.items;
+    gifts = ITEMS.map((g) => ({ ...g, reserved_by: data.reserved[g.id] || null }));
     // забути токени подарунків, які вже не мої
     for (const id of Object.keys(tokens)) {
       if (!gifts.find((g) => String(g.id) === id && g.reserved_by)) delete tokens[id];
@@ -104,12 +126,16 @@
     for (const g of gifts) {
       const mine = !!tokens[g.id];
       const taken = !!g.reserved_by && !mine;
-      const li = el("li", "py-5");
-      const row = el("div", "flex items-start justify-between gap-4");
+      const li = el("li", "card");
+      const href = g.link && safeUrl(g.link);
 
       const info = el("div", "min-w-0" + (taken ? " opacity-40" : ""));
-      const name = el("p", "font-medium break-words" + (taken ? " line-through" : ""));
-      const href = g.link && safeUrl(g.link);
+      const cover = el(href ? "a" : "div", "cover");
+      if (href) { cover.href = href; cover.target = "_blank"; cover.rel = "noopener"; cover.tabIndex = -1; }
+      const src = g.img && safeUrl(g.img);
+      if (src) { const img = el("img"); img.src = src; img.alt = ""; img.loading = "lazy"; cover.append(img); }
+      info.append(cover);
+      const name = el("p", "mt-3 font-medium break-words" + (taken ? " line-through" : ""));
       if (href) {
         const a = el("a", "underline decoration-line underline-offset-4 hover:decoration-fg", g.title);
         a.href = href; a.target = "_blank"; a.rel = "noopener";
@@ -118,30 +144,40 @@
       info.append(name);
       const meta = [g.price, g.note].filter(Boolean).join(" · ");
       if (meta) info.append(el("p", "mt-1 text-sm text-muted break-words", meta));
-      row.append(info);
+      li.append(info);
 
-      const side = el("div", "shrink-0 text-right");
+      const side = el("div", "actions");
+      const pair = (second) => {
+        const p = el("div", "flex flex-wrap gap-2");
+        if (href) {
+          const buy = el("a", SOLID + " flex-1 w-full", "Купити");
+          buy.href = href; buy.target = "_blank"; buy.rel = "noopener";
+          p.append(buy);
+        }
+        second.className += " flex-1 w-full";
+        p.append(second);
+        return p;
+      };
       if (mine) {
-        side.append(btn(LINE + " border-fg", "Скасувати", () => cancel(g.id)));
-        side.append(el("p", "mt-1 text-xs text-muted", "Дарує " + g.reserved_by + " (ви)"));
+        side.append(pair(btn(LINE + " border-fg", "Скасувати", () => cancel(g.id))));
+        side.append(el("p", "mt-1 text-xs text-muted text-center", "Дарує " + g.reserved_by + " (ви)"));
       } else if (taken) {
-        side.append(el("span", "inline-block rounded-md bg-soft px-3 py-1.5 text-sm text-muted", "Дарує " + g.reserved_by));
+        side.append(el("span", "inline-flex w-full rounded-md bg-soft px-3 py-1.5 text-sm text-muted", "Дарує " + g.reserved_by));
       } else if (openForm !== g.id) {
-        side.append(btn(SOLID, "Зарезервувати", () => { openForm = g.id; render(); $("name-" + g.id).focus(); }));
-      }
-      row.append(side);
-      li.append(row);
-
-      if (openForm === g.id && !g.reserved_by) {
-        const f = el("form", "mt-3 flex flex-wrap gap-2");
-        const input = el("input", "min-w-0 flex-1 rounded-md border border-line bg-bg px-3 py-1.5 text-sm placeholder:text-faint focus:border-fg focus:outline-none");
+        side.append(pair(btn(LINE, "Зарезервувати", () => { openForm = g.id; render(); $("name-" + g.id).focus(); })));
+      } else {
+        const f = el("form");
+        const input = el("input", "w-full rounded-md border border-line bg-bg px-3 py-1.5 text-sm placeholder:text-faint focus:border-fg focus:outline-none");
         input.id = "name-" + g.id; input.required = true; input.maxLength = 60;
         input.placeholder = "Ваше ім'я"; input.autocomplete = "name";
         input.value = store.get("wishlist-name", "");
-        f.append(input, btn(SOLID, "Підтвердити", null, "submit"), btn(LINE, "Відміна", () => { openForm = null; render(); }));
+        const bs = el("div", "mt-2 flex gap-2");
+        bs.append(btn(SOLID + " flex-1 w-full", "OK", null, "submit"), btn(LINE + " flex-1 w-full", "Відміна", () => { openForm = null; render(); }));
+        f.append(input, bs);
         f.addEventListener("submit", (e) => { e.preventDefault(); reserve(g.id, input.value, f); });
-        li.append(f);
+        side.append(f);
       }
+      li.append(side);
       list.append(li);
     }
   }

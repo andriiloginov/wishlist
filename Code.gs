@@ -1,13 +1,16 @@
 /**
- * Вішліст на новосілля: бекенд на Google Apps Script.
- * Таблиця (перший аркуш), рядок 1 — заголовки:
- * A Назва | B Посилання | C Ціна | D Нотатка | E Хто дарує | F Токен (не чіпати) | G ID (не чіпати)
+ * Вішліст на день народження: бекенд на Google Apps Script.
+ * Подарунки захардкоджені в index.html, тут зберігаються лише резерви.
+ * Таблиця (перший аркуш), рядок 1 — заголовки (будь-які), далі:
+ * A ID подарунка | B Хто дарує | C Токен (не чіпати)
  */
 
-const COLS = 7;
-
 function doGet() {
-  return withLock_(() => json_({ items: list_() }));
+  return withLock_(() => {
+    const reserved = {};
+    for (const r of rows_().data) if (r[0]) reserved[r[0]] = r[1];
+    return json_({ reserved });
+  });
 }
 
 function doPost(e) {
@@ -20,45 +23,30 @@ function doPost(e) {
   });
 }
 
-function list_() {
-  const { sh, data } = rows_();
-  return data
-    .map((r, i) => {
-      if (!r[0].trim()) return null;
-      if (!r[6]) {                                   // новий рядок — даємо йому ID
-        r[6] = Utilities.getUuid().slice(0, 8);
-        sh.getRange(i + 2, 7).setValue(r[6]);
-      }
-      return { id: r[6], title: r[0], link: r[1], price: r[2], note: r[3], reserved_by: r[4] || null };
-    })
-    .filter(Boolean);
-}
-
 function reserve_(id, name) {
   name = name.trim().slice(0, 60);
   if (!name) return { error: 'no_name' };
+  if (!/^[a-z0-9-]{1,40}$/.test(id)) return { error: 'not_found' };
   const { sh, data } = rows_();
-  const i = data.findIndex((r) => r[6] === id);
-  if (i < 0) return { error: 'not_found' };
-  if (data[i][4]) return { ok: false };             // вже хтось зарезервував
+  if (data.some((r) => r[0] === id)) return { ok: false };   // вже хтось зарезервував
   const token = Utilities.getUuid();
   // "'" на початку не дає імені стати формулою
-  sh.getRange(i + 2, 5, 1, 2).setValues([["'" + name, token]]);
+  sh.appendRow([id, "'" + name, token]);
   return { ok: true, token };
 }
 
 function cancel_(id, token) {
   const { sh, data } = rows_();
-  const i = data.findIndex((r) => r[6] === id);
-  if (i < 0 || !token || data[i][5] !== token) return { ok: false };
-  sh.getRange(i + 2, 5, 1, 2).clearContent();
+  const i = data.findIndex((r) => r[0] === id);
+  if (i < 0 || !token || data[i][2] !== token) return { ok: false };
+  sh.deleteRow(i + 2);
   return { ok: true };
 }
 
 function rows_() {
   const sh = SpreadsheetApp.getActive().getSheets()[0];
   const n = sh.getLastRow() - 1;
-  const data = n > 0 ? sh.getRange(2, 1, n, COLS).getDisplayValues() : [];
+  const data = n > 0 ? sh.getRange(2, 1, n, 3).getDisplayValues() : [];
   return { sh, data };
 }
 
