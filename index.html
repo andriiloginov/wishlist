@@ -21,10 +21,9 @@
 </script>
 <style>
   /* Layout: framed center column with hairline rules, cover tiles on a 1px grid, graph-paper strips between sections */
-  :root { --bg:#e2e4dd; --panel:#fff; --ink:#0b0c0d; --muted:#5b636c; --line:#9aa2aa; --soft:#d0d2c8; --accent:#ffb200; --accent-line:#bd8209; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#101113; --panel:#18191c; --ink:#eef0ea; --muted:#9aa1a9; --line:#3a3f45; --soft:#26292d; --accent:#ffb200; --accent-line:#bd8209; color-scheme: dark; } }
-  :root[data-theme="dark"] { --bg:#101113; --panel:#18191c; --ink:#eef0ea; --muted:#9aa1a9; --line:#3a3f45; --soft:#26292d; --accent:#ffb200; --accent-line:#bd8209; color-scheme: dark; }
+  :root { --bg:#e2e4dd; --panel:#fff; --ink:#0b0c0d; --muted:#5b636c; --line:#9aa2aa; --soft:#d0d2c8; --accent:#ffb200; --accent-line:#bd8209; color-scheme: light; }
   body { background: var(--bg); color: var(--ink); margin: 0; }
+  [hidden] { display: none !important; }
   .font-display { font-stretch: 125%; }
   .grid-bg { background-image: linear-gradient(var(--soft) 1px, transparent 1px), linear-gradient(90deg, var(--soft) 1px, transparent 1px); background-size: 22px 22px; background-position: -1px -1px; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -37,6 +36,7 @@
     <h1 class="mt-5 font-display text-2xl font-medium leading-tight sm:text-3xl">Вішліст</h1>
     <p class="mx-auto mt-5 max-w-xl text-base text-muted sm:text-lg">Оберіть гру й натисніть «Купити», щоб перейти в магазин.</p>
   </header>
+  <nav id="chips" aria-label="Платформи" class="flex flex-wrap justify-center gap-2 border-b border-line px-4 py-4"></nav>
   <div class="grid-bg h-10 border-b border-line bg-bg"></div>
   <ul id="list" class="grid grid-cols-2 overflow-hidden bg-panel sm:grid-cols-3"></ul>
   <div class="grid-bg h-10 border-t border-line bg-bg"></div>
@@ -75,6 +75,25 @@
     li.append(cover, tag, name, foot);
     document.getElementById("list").append(li);
   }
+
+  // Фільтр: платформа = текст нотатки до першої коми
+  const platformOf = (g) => g.note.split(",")[0].trim();
+  const cards = [...document.getElementById("list").children];
+  const CHIP = "rounded-full border px-3 py-1 font-mono text-xs uppercase tracking-wide transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink";
+  const ON = " border-ink bg-ink text-panel", OFF = " border-line bg-panel text-ink hover:border-ink";
+  const chips = document.getElementById("chips");
+  const select = (p) => {
+    cards.forEach((li, i) => { li.hidden = p !== null && platformOf(ITEMS[i]) !== p; });
+    for (const b of chips.children) { const on = b.dataset.p === String(p); b.className = CHIP + (on ? ON : OFF); b.setAttribute("aria-pressed", on); }
+  };
+  for (const p of [null, ...new Set(ITEMS.map(platformOf))]) {
+    const n = p === null ? ITEMS.length : ITEMS.filter((g) => platformOf(g) === p).length;
+    const b = el("button", null, (p ?? "Усі") + " · " + n);
+    b.type = "button"; b.dataset.p = String(p);
+    b.addEventListener("click", () => select(p));
+    chips.append(b);
+  }
+  select(null);
 </script>
 </body>
 </html>
