@@ -171,7 +171,35 @@
     confetti({ particleCount: 90, spread: 75, startVelocity: 38, origin, colors, disableForReducedMotion: true });
     confetti({ particleCount: 40, spread: 120, startVelocity: 25, scalar: 0.8, origin, colors, disableForReducedMotion: true });
   };
-  avatar.addEventListener("click", burst);
+  // Дудка-язик: синтезуємо звук, без файлів. Звук браузер дозволяє лише після кліку, тому тільки по натисканню
+  let ac;
+  const toot = () => {
+    try {
+      ac ??= new (window.AudioContext || window.webkitAudioContext)();
+      const t = ac.currentTime, out = ac.createGain(), lp = ac.createBiquadFilter();
+      lp.type = "lowpass"; lp.frequency.value = 2200; lp.Q.value = 6;
+      out.gain.setValueAtTime(0.0001, t);
+      out.gain.exponentialRampToValueAtTime(0.22, t + 0.04);
+      out.gain.setValueAtTime(0.22, t + 0.55);
+      out.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+      lp.connect(out).connect(ac.destination);
+      const wob = ac.createOscillator(), wobAmt = ac.createGain();
+      wob.frequency.value = 22; wobAmt.gain.value = 9;   // тріскуча вібрація паперової дудки
+      wob.connect(wobAmt);
+      for (const detune of [-12, 9]) {
+        const o = ac.createOscillator();
+        o.type = "sawtooth"; o.detune.value = detune;
+        o.frequency.setValueAtTime(330, t);
+        o.frequency.exponentialRampToValueAtTime(520, t + 0.12);   // розгортається
+        o.frequency.setValueAtTime(520, t + 0.6);
+        o.frequency.exponentialRampToValueAtTime(390, t + 0.8);    // і здувається
+        wobAmt.connect(o.frequency);
+        o.connect(lp); o.start(t); o.stop(t + 0.82);
+      }
+      wob.start(t); wob.stop(t + 0.82);
+    } catch {}
+  };
+  avatar.addEventListener("click", () => { toot(); burst(); });
   setTimeout(burst, 400);
 </script>
 </body>
